@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+
+  nginx:
+    image: nginx:1.19.3-alpine
+    container_name: nginx
+    volumes:
+      - .:/app
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 8080:80
+    depends_on:
+      - php-fpm
+
+  php-fpm:
+    build: ./docker/php-fpm
+    container_name: php-fpm
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+
+  php-cli:
+    build: ./docker/php-cli
+    container_name: php-cli
+    volumes:
+      - .:/app
+      - composer_data:/home/appuser/.composer/cache
+
+  db:
+    image: mysql:8.0
+    container_name: db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 3308:3306
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_USER: api_platform
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: api_platform
+      SERVICE_NAME: mysql
+      TZ: Asia/Baku
+    command: --sql_mode=""
+
+volumes:
+  db_data:
+  composer_data:
