@@ -23,7 +23,7 @@ services:
       - api-platform
 
   php:
-    image: symdock:latest
+    image: vagifrzada/phpdock:latest
     container_name: php
     volumes:
       - .:/app
