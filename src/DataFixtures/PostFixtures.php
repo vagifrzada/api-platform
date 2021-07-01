@@ -5,29 +5,42 @@ declare(strict_types=1);
 namespace App\DataFixtures;
 
 use DateTime;
+use App\Entity\User;
 use App\Entity\Post;
+use Faker\Factory;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 
-class PostFixtures extends Fixture
+class PostFixtures extends Fixture implements DependentFixtureInterface
 {
+    public const REFERENCE_KEY = 'symf-post-';
+
     public function load(ObjectManager $manager)
     {
-        $post = new Post();
-        $post->setTitle('This is my first post !');
-        $post->setSlug('this-is-my-first-post');
-        $post->setContent('Some text here ...');
-        $post->setCreatedAt(new DateTime());
+        /** @var User $user */
+        $user = $this->getReference(UserFixtures::REFERENCE_KEY);
+        $faker = Factory::create();
 
-        $manager->persist($post);
+        for ($i = 0; $i < 100; $i++) {
+            $post = new Post();
+            $post->setAuthor($user);
+            $post->setTitle($faker->realText(50));
+            $post->setSlug($faker->slug());
+            $post->setContent($faker->realText(150));
+            $post->setCreatedAt($faker->dateTimeThisYear());
+            $manager->persist($post);
 
-        $post = new Post();
-        $post->setTitle('This is my second post !');
-        $post->setSlug('this-is-my-second-post');
-        $post->setContent('Some text here ...');
-        $post->setCreatedAt(new DateTime());
+            $this->addReference(self::REFERENCE_KEY . $i, $post);
+        }
 
-        $manager->persist($post);
         $manager->flush();
+    }
+
+    public function getDependencies(): array
+    {
+        return [
+            UserFixtures::class,
+        ];
     }
 }
