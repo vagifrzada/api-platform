@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\DataFixtures;
 
-use DateTime;
+use Faker\Factory;
 use App\Entity\User;
 use App\Entity\Post;
-use Faker\Factory;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
