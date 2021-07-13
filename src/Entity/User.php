@@ -10,47 +10,77 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ORM\Table("users")
- * @ApiResource()
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ * @UniqueEntity("email")
  *
  * @method string getUserIdentifier()
  */
+#[ApiResource(
+    collectionOperations: ['post'],
+    itemOperations: ['get'],
+    normalizationContext: ['groups' => ['user:read']]
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer", options={"unsigned"=true})
+     * @Groups({"user:read"})
      */
     private int $id;
 
     /**
      * @ORM\Column(type="string", unique=true, length=100)
+     * @Assert\NotBlank()
+     * @Assert\Email()
      */
     private string $email;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank()
+     * @Assert\Length(min=3, max=100)
+     * @Groups({"user:read"})
      */
     private string $name;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank()
+     * @Assert\Regex(
+     *     pattern="/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z-_\d]{7,}/",
+     *     message="Password must be minimum seven characters long and contain at least one digit and one uppercase and lowercase letter."
+     * )
+     * @Assert\Expression(
+     *     expression="this.isValidPassword()",
+     *     message="Password must be confirmed"
+     * )
      */
     private string $password;
 
     /**
+     * @Assert\NotBlank()
+     */
+    private string $passwordConfirmation;
+
+    /**
      * @ORM\Column(type="datetime", name="created_at", nullable=false)
+     * @Groups({"user:read"})
      */
     private DateTimeInterface $createdAt;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Post", mappedBy="author")
+     * @Groups({"user:read"})
      */
     private Collection $posts;
 
@@ -102,6 +132,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): self
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    public function getPasswordConfirmation(): string
+    {
+        return $this->passwordConfirmation;
+    }
+
+    public function setPasswordConfirmation(string $passwordConfirmation): self
+    {
+        $this->passwordConfirmation = $passwordConfirmation;
 
         return $this;
     }
@@ -163,5 +205,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getUsername(): string
     {
         return $this->email;
+    }
+
+    public function isValidPassword(): bool
+    {
+        return $this->password === $this->passwordConfirmation;
     }
 }
