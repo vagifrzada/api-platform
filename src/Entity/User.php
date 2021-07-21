@@ -24,11 +24,13 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
  * @method string getUserIdentifier()
  */
 #[ApiResource(
-    collectionOperations: ['post'],
-    itemOperations: [
-        'get' => ['access_control' => "is_granted('IS_AUTHENTICATED_FULLY')"],
+    collectionOperations: [
+        "post",
     ],
-    normalizationContext: ['groups' => ['user:read']]
+    itemOperations: [
+        "get" => ["access_control" => "is_granted('IS_AUTHENTICATED_FULLY')"],
+    ],
+    normalizationContext: ["groups" => ["user:read"]]
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
