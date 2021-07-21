@@ -11,11 +11,19 @@ use ApiPlatform\Core\Annotation\ApiResource;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CommentRepository")
  * @ORM\Table("comments")
- * @ApiResource(
- *     collectionOperations={"get"},
- *     itemOperations={"get"}
- * )
  */
+#[ApiResource(
+    collectionOperations: [
+        "get",
+        "post" => ["security" => "is_granted('IS_AUTHENTICATED_FULLY')"],
+    ],
+    itemOperations: [
+        "get",
+        "put" => [
+            "security" => "is_granted('IS_AUTHENTICATED_FULLY') and object.getAuthor() == user",
+        ],
+    ],
+)]
 class Comment
 {
     /**

@@ -23,12 +23,12 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ApiResource(
     collectionOperations: [
         "get",
-        "post" => ["access_control" => "is_granted('IS_AUTHENTICATED_FULLY')"],
+        "post" => ["security" => "is_granted('IS_AUTHENTICATED_FULLY')"],
     ],
     itemOperations: [
         "get",
         "put" => [
-            "access_control" => "is_granted('IS_AUTHENTICATED_FULLY') and object.getAuthor() == user"
+            "security" => "is_granted('IS_AUTHENTICATED_FULLY') and object.getAuthor() == user",
         ],
     ],
 )]

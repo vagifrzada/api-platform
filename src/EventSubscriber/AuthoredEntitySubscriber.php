@@ -26,7 +26,9 @@ class AuthoredEntitySubscriber implements EventSubscriberInterface
         $entity = $event->getControllerResult();
         $request = $event->getRequest();
 
-        if ((!$entity instanceof Post) || ($request->getMethod() !== Request::METHOD_POST)) {
+        if (
+            (!$entity instanceof Post && !$entity instanceof Comment)
+            || ($request->getMethod() !== Request::METHOD_POST)) {
             return;
         }
 

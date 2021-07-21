@@ -25,7 +25,10 @@ class UserPasswordHashSubscriber implements EventSubscriberInterface
         $result = $event->getControllerResult();
         $request = $event->getRequest();
 
-        if ($request->getMethod() !== Request::METHOD_POST || !$result instanceof User) {
+        if (
+            !$result instanceof User
+            || !in_array($request->getMethod(), [Request::METHOD_POST, Request::METHOD_PUT])
+        ) {
             return;
         }
         // This is a user instance. So, we need to hash password.

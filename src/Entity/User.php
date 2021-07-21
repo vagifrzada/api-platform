@@ -25,12 +25,20 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
  */
 #[ApiResource(
     collectionOperations: [
-        "post",
+        "post" => [
+            "denormalization_context" => ["groups" => ["users:store"]],
+        ],
     ],
     itemOperations: [
-        "get" => ["access_control" => "is_granted('IS_AUTHENTICATED_FULLY')"],
+        "get" => [
+            "security" => "is_granted('IS_AUTHENTICATED_FULLY')",
+        ],
+        "put" => [
+            "security" => "is_granted('IS_AUTHENTICATED_FULLY') and object == user",
+            "denormalization_context" => ["groups" => ["users:modify"]],
+        ],
     ],
-    normalizationContext: ["groups" => ["user:read"]]
+    normalizationContext: ["groups" => ["users:read"]]
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -38,12 +46,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer", options={"unsigned"=true})
-     * @Groups({"user:read"})
+     * @Groups({"users:read"})
      */
     private int $id;
 
     /**
      * @ORM\Column(type="string", unique=true, length=100)
+     * @Groups({"users:store"})
      * @Assert\NotBlank()
      * @Assert\Email()
      */
@@ -53,12 +62,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank()
      * @Assert\Length(min=3, max=100)
-     * @Groups({"user:read"})
+     * @Groups({"users:read", "users:store", "users:modify"})
      */
     private string $name;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"users:store", "users:modify"})
      * @Assert\NotBlank()
      * @Assert\Regex(
      *     pattern="/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z-_\d]{7,}/",
@@ -72,19 +82,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private string $password;
 
     /**
+     * @Groups({"users:store", "users:modify"})
      * @Assert\NotBlank()
      */
     private string $passwordConfirmation;
 
     /**
      * @ORM\Column(type="datetime", name="created_at", nullable=false)
-     * @Groups({"user:read"})
+     * @Groups({"users:read", "users:store"})
      */
     private DateTimeInterface $createdAt;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Post", mappedBy="author")
-     * @Groups({"user:read"})
+     * @Groups({"users:read"})
      */
     private Collection $posts;
 
