@@ -18,11 +18,11 @@ class PostFixtures extends Fixture implements DependentFixtureInterface
     public function load(ObjectManager $manager)
     {
         /** @var User $user */
-        $user = $this->getReference(UserFixtures::REFERENCE_KEY);
         $faker = Factory::create();
 
         for ($i = 0; $i < 100; $i++) {
             $post = new Post();
+            $user = $this->getReference(UserFixtures::REFERENCE_KEY . rand(0, 3));
             $post->setAuthor($user);
             $post->setTitle($faker->realText(50));
             $post->setSlug($faker->slug());

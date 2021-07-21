@@ -8,9 +8,13 @@ use DateTimeInterface;
 use JetBrains\PhpStorm\Pure;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\PostRepository;
+use App\Contract\HasDatesInterface;
+use App\Contract\AuthoredEntityInterface;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
@@ -31,8 +35,11 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
             "security" => "is_granted('IS_AUTHENTICATED_FULLY') and object.getAuthor() == user",
         ],
     ],
+    denormalizationContext: [
+        "groups" => ["posts:fillable"]
+    ],
 )]
-class Post
+class Post implements AuthoredEntityInterface, HasDatesInterface
 {
     /**
      * @ORM\Id
@@ -45,10 +52,11 @@ class Post
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="posts")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=false)
      */
-    private User $author;
+    private UserInterface $author;
 
     /**
      * @ORM\Column(type="string", unique=true, columnDefinition="VARCHAR(255) NOT NULL AFTER `id`")
+     * @Groups({"posts:fillable"})
      * @Assert\NotBlank()
      * @Assert\Length(min=10, max=255)
      */
@@ -56,6 +64,7 @@ class Post
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"posts:fillable"})
      * @Assert\NotBlank()
      * @Assert\Length(min=10, max=255)
      */
@@ -63,6 +72,7 @@ class Post
 
     /**
      * @ORM\Column(type="text")
+     * @Groups({"posts:fillable"})
      * @Assert\NotBlank()
      * @Assert\Length(min=20)
      */
@@ -70,8 +80,6 @@ class Post
 
     /**
      * @ORM\Column(type="datetime", name="created_at")
-     * @Assert\NotBlank
-     * @Assert\Type("DateTimeInterface")
      */
     private DateTimeInterface $createdAt;
 
@@ -131,21 +139,19 @@ class Post
         return $this->createdAt;
     }
 
-    public function setCreatedAt(DateTimeInterface $dateTime): self
+    public function setCreatedAt(DateTimeInterface $dateTime): void
     {
         $this->createdAt = $dateTime;
-
-        return $this;
     }
 
-    public function setAuthor(User $user): self
+    public function setAuthor(UserInterface $user): void
     {
+        /** @var User $user */
         $this->author = $user;
         $user->addPost($this);
-        return $this;
     }
 
-    public function getAuthor(): User
+    public function getAuthor(): UserInterface
     {
         return $this->author;
     }

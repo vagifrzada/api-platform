@@ -12,7 +12,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserFixtures extends Fixture
 {
-    public const REFERENCE_KEY = 'symf-user';
+    public const REFERENCE_KEY = 'symf-user-';
 
     public function __construct(
         private UserPasswordHasherInterface $userPasswordHasher,
@@ -21,15 +21,44 @@ class UserFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        $user = new User();
-        $user->setName("Vagif Rufullazada");
-        $user->setEmail("vagif@rufullazada.me");
-        $user->setPassword($this->userPasswordHasher->hashPassword($user, 'secret'));
-        $user->setCreatedAt(new DateTime());
+        foreach ($this->getData() as $index => $userFixture) {
+            $user = new User();
+            $user->setName($userFixture['name']);
+            $user->setEmail($userFixture['email']);
+            $user->setPassword($this->userPasswordHasher->hashPassword($user, $userFixture['password']));
+            $user->setCreatedAt(new DateTime());
 
-        $manager->persist($user);
+            $this->addReference(self::REFERENCE_KEY . $index, $user);
+
+            $manager->persist($user);
+        }
+
         $manager->flush();
+    }
 
-        $this->addReference(self::REFERENCE_KEY, $user);
+    private function getData(): array
+    {
+        return [
+            [
+                'name' => 'Vagif Rufullazada',
+                'email' => 'vagif@rufullazada.me',
+                'password' => 'Secret123',
+            ],
+            [
+                'name' => 'Kamran Tagiev',
+                'email' => 'kamran@tagiev.com',
+                'password' => 'Secret123',
+            ],
+            [
+                'name' => 'John Doe',
+                'email' => 'john@doe.com',
+                'password' => 'Secret123',
+            ],
+            [
+                'name' => 'Jack Sparrow',
+                'email' => 'jack@sparrow.com',
+                'password' => 'Secret123',
+            ],
+        ];
     }
 }

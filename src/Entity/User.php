@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Contract\HasDatesInterface;
 use DateTimeInterface;
 use JetBrains\PhpStorm\Pure;
 use Doctrine\ORM\Mapping as ORM;
@@ -40,7 +41,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
     ],
     normalizationContext: ["groups" => ["users:read"]]
 )]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDatesInterface
 {
     /**
      * @ORM\Id
@@ -168,11 +169,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->createdAt;
     }
 
-    public function setCreatedAt(DateTimeInterface $createdAt): self
+    public function setCreatedAt(DateTimeInterface $dateTime): void
     {
-        $this->createdAt = $createdAt;
-
-        return $this;
+        $this->createdAt = $dateTime;
     }
 
     public function getPosts(): Collection

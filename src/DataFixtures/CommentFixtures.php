@@ -21,8 +21,6 @@ class CommentFixtures extends Fixture implements DependentFixtureInterface
      */
     public function load(ObjectManager $manager): void
     {
-        /** @var User $user */
-        $user = $this->getReference(UserFixtures::REFERENCE_KEY);
         $faker = Factory::create();
 
         for ($i = 0; $i < 100; $i++) {
@@ -30,6 +28,8 @@ class CommentFixtures extends Fixture implements DependentFixtureInterface
             $post = $this->getReference(PostFixtures::REFERENCE_KEY . $i);
             for ($j = 0; $j < random_int(1, 15); $j++) {
                 $comment = new Comment();
+                /** @var User $user */
+                $user = $this->getReference(UserFixtures::REFERENCE_KEY . rand(0, 3));
                 $comment->setAuthor($user);
                 $comment->setPost($post);
                 $comment->setBody($faker->realTextBetween(20, 50));

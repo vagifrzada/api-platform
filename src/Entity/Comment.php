@@ -6,7 +6,12 @@ namespace App\Entity;
 
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use App\Contract\HasDatesInterface;
+use App\Contract\AuthoredEntityInterface;
 use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CommentRepository")
@@ -23,8 +28,11 @@ use ApiPlatform\Core\Annotation\ApiResource;
             "security" => "is_granted('IS_AUTHENTICATED_FULLY') and object.getAuthor() == user",
         ],
     ],
+    denormalizationContext: [
+        "groups" => ["comments:fillable"],
+    ],
 )]
-class Comment
+class Comment implements AuthoredEntityInterface, HasDatesInterface
 {
     /**
      * @ORM\Id
@@ -37,7 +45,7 @@ class Comment
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="comments")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=false)
      */
-    private User $author;
+    private UserInterface $author;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Post", inversedBy="comments")
@@ -47,6 +55,9 @@ class Comment
 
     /**
      * @ORM\Column(type="text")
+     * @Groups({"comments:fillable"})
+     * @Assert\NotBlank()
+     * @Assert\Length(min=5, max=3000)
      */
     private string $body;
 
@@ -77,21 +88,19 @@ class Comment
         return $this->createdAt;
     }
 
-    public function setCreatedAt(DateTimeInterface $createdAt): self
+    public function setCreatedAt(DateTimeInterface $dateTime): void
     {
-        $this->createdAt = $createdAt;
-
-        return $this;
+        $this->createdAt = $dateTime;
     }
 
-    public function setAuthor(User $user): self
+    public function setAuthor(UserInterface $user): void
     {
+        /** @var User $user */
         $this->author = $user;
         $user->addComment($this);
-        return $this;
     }
 
-    public function getAuthor(): User
+    public function getAuthor(): UserInterface
     {
         return $this->author;
     }
