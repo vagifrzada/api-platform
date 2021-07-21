@@ -11,15 +11,22 @@ use App\Repository\PostRepository;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=PostRepository::class)
  * @ORM\Table("posts")
- * @ApiResource(
- *     collectionOperations={"get"},
- *     itemOperations={"get"}
- * )
+ *
+ * @UniqueEntity("slug")
  */
+#[ApiResource(
+    collectionOperations: [
+        "get",
+        "post" => ["access_control" => "is_granted('IS_AUTHENTICATED_FULLY')"],
+    ],
+    itemOperations: ["get"],
+)]
 class Post
 {
     /**
@@ -37,21 +44,29 @@ class Post
 
     /**
      * @ORM\Column(type="string", unique=true, columnDefinition="VARCHAR(255) NOT NULL AFTER `id`")
+     * @Assert\NotBlank()
+     * @Assert\Length(min=10, max=255)
      */
     private string $slug;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank()
+     * @Assert\Length(min=10, max=255)
      */
     private string $title;
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\NotBlank()
+     * @Assert\Length(min=20)
      */
     private string $content;
 
     /**
      * @ORM\Column(type="datetime", name="created_at")
+     * @Assert\NotBlank
+     * @Assert\Type("DateTimeInterface")
      */
     private DateTimeInterface $createdAt;
 

@@ -25,7 +25,9 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
  */
 #[ApiResource(
     collectionOperations: ['post'],
-    itemOperations: ['get'],
+    itemOperations: [
+        'get' => ['access_control' => "is_granted('IS_AUTHENTICATED_FULLY')"],
+    ],
     normalizationContext: ['groups' => ['user:read']]
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
