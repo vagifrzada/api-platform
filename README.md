@@ -5,7 +5,7 @@
 
 ### Initialization of project
 
-- Copy .env.local as **.env**
+- Copy .env.example as **.env**
 
 ```bash
 $ make init
