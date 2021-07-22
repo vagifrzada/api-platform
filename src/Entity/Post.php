@@ -28,14 +28,16 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ApiResource(
     collectionOperations: [
         "get",
-        "post" => ["security" => "is_granted('IS_AUTHENTICATED_FULLY')"],
+        "post" => ["security" => "is_granted('ROLE_WRITER')"],
     ],
     itemOperations: [
         "get" => [
             "normalization_context" => ["groups" => ["posts:show"]],
         ],
         "put" => [
-            "security" => "is_granted('IS_AUTHENTICATED_FULLY') and object.getAuthor() == user",
+            // If the user has role ROLE_EDITOR he can modify post.
+            // Or If the user has role ROLE_WRITER and he is the owner of this post, then he can modify it.
+            "security" => "is_granted('ROLE_EDITOR') or (is_granted('ROLE_WRITER') and object.getAuthor() == user)",
         ],
     ],
     denormalizationContext: [

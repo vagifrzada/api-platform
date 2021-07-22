@@ -244,7 +244,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
         return !empty(array_intersect(UserRole::writerRoles(), $this->getRoles()));
     }
 
-    public function canPostAComment(): bool
+    #[Pure] public function canPostAComment(): bool
     {
         return !empty(array_intersect(UserRole::commentatorRoles(), $this->getRoles()));
     }

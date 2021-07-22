@@ -19,12 +19,12 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 #[ApiResource(
     collectionOperations: [
-        "post" => ["security" => "is_granted('IS_AUTHENTICATED_FULLY')"],
+        "post" => ["security" => "is_granted('ROLE_COMMENTATOR')"],
     ],
     itemOperations: [
         "get",
         "put" => [
-            "security" => "is_granted('IS_AUTHENTICATED_FULLY') and object.getAuthor() == user",
+            "security" => "is_granted('ROLE_EDITOR') or (is_granted('ROLE_COMMENTATOR') and object.getAuthor() == user)",
         ],
     ],
     subresourceOperations: [
