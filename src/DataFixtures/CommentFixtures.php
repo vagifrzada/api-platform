@@ -29,7 +29,7 @@ class CommentFixtures extends Fixture implements DependentFixtureInterface
             for ($j = 0; $j < random_int(1, 15); $j++) {
                 $comment = new Comment();
                 /** @var User $user */
-                $user = $this->getReference(UserFixtures::REFERENCE_KEY . rand(0, 3));
+                $user = $this->getRandomUser();
                 $comment->setAuthor($user);
                 $comment->setPost($post);
                 $comment->setBody($faker->realTextBetween(20, 50));
@@ -47,5 +47,12 @@ class CommentFixtures extends Fixture implements DependentFixtureInterface
             UserFixtures::class,
             PostFixtures::class,
         ];
+    }
+
+    private function getRandomUser(): User
+    {
+        /** @var User $user */
+        $user = $this->getReference(UserFixtures::getRandomReferenceKey());
+        return !$user->canPostAComment() ? $this->getRandomUser() : $user;
     }
 }

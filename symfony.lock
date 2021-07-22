@@ -144,6 +144,9 @@
             "config/packages/lexik_jwt_authentication.yaml"
         ]
     },
+    "myclabs/php-enum": {
+        "version": "1.8.3"
+    },
     "namshi/jose": {
         "version": "7.2.3"
     },

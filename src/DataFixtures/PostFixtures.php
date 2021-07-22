@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataFixtures;
 
+use App\Enum\UserRole;
 use Faker\Factory;
 use App\Entity\User;
 use App\Entity\Post;
@@ -22,7 +23,7 @@ class PostFixtures extends Fixture implements DependentFixtureInterface
 
         for ($i = 0; $i < 100; $i++) {
             $post = new Post();
-            $user = $this->getReference(UserFixtures::REFERENCE_KEY . rand(0, 3));
+            $user = $this->getRandomUser();
             $post->setAuthor($user);
             $post->setTitle($faker->realText(50));
             $post->setSlug($faker->slug());
@@ -41,5 +42,12 @@ class PostFixtures extends Fixture implements DependentFixtureInterface
         return [
             UserFixtures::class,
         ];
+    }
+
+    private function getRandomUser(): User
+    {
+        /** @var User $user */
+        $user = $this->getReference(UserFixtures::getRandomReferenceKey());
+        return !$user->canWritePost() ? $this->getRandomUser() : $user;
     }
 }

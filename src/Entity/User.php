@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Contract\HasDatesInterface;
+use App\Enum\UserRole;
 use DateTimeInterface;
 use JetBrains\PhpStorm\Pure;
 use Doctrine\ORM\Mapping as ORM;
+use App\Contract\HasDatesInterface;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -47,29 +48,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer", options={"unsigned"=true})
-     * @Groups({"users:read"})
      */
+    #[Groups(["users:read", "post:comments:subresource", "posts:show"])]
     private int $id;
 
     /**
      * @ORM\Column(type="string", unique=true, length=100)
-     * @Groups({"users:store"})
      * @Assert\NotBlank()
      * @Assert\Email()
      */
+    #[Groups(["users:store"])]
     private string $email;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank()
      * @Assert\Length(min=3, max=100)
-     * @Groups({"users:read", "users:store", "users:modify"})
      */
+    #[Groups(["users:read", "users:store", "users:modify", "post:comments:subresource", "posts:show"])]
     private string $name;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"users:store", "users:modify"})
      * @Assert\NotBlank()
      * @Assert\Regex(
      *     pattern="/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z-_\d]{7,}/",
@@ -80,24 +80,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
      *     message="Password must be confirmed"
      * )
      */
+    #[Groups(["users:store", "users:modify"])]
     private string $password;
 
     /**
-     * @Groups({"users:store", "users:modify"})
      * @Assert\NotBlank()
      */
+    #[Groups(["users:store", "users:modify"])]
     private string $passwordConfirmation;
 
     /**
      * @ORM\Column(type="datetime", name="created_at", nullable=false)
-     * @Groups({"users:read", "users:store"})
      */
+    #[Groups(["users:read", "users:store", "post:comments:subresource", "posts:show"])]
     private DateTimeInterface $createdAt;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Post", mappedBy="author")
-     * @Groups({"users:read"})
      */
+    #[Groups(["users:read"])]
     private Collection $posts;
 
     /**
@@ -105,10 +106,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
      */
     private Collection $comments;
 
+    /**
+     * @ORM\Column(type="simple_array", length=200, nullable=true)
+     */
+    private array $roles;
+
     #[Pure] public function __construct()
     {
         $this->posts = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->roles = UserRole::getDefaultRoles();
     }
 
     public function getId(): int
@@ -204,7 +211,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
 
     public function getRoles(): array
     {
-        return ['ROLE_USER'];
+        return $this->roles;
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
+        return $this;
     }
 
     public function getSalt(): ?string
@@ -224,5 +237,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
     public function isValidPassword(): bool
     {
         return $this->password === $this->passwordConfirmation;
+    }
+
+    #[Pure] public function canWritePost(): bool
+    {
+        return !empty(array_intersect(UserRole::writerRoles(), $this->getRoles()));
+    }
+
+    public function canPostAComment(): bool
+    {
+        return !empty(array_intersect(UserRole::commentatorRoles(), $this->getRoles()));
     }
 }

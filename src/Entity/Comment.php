@@ -19,13 +19,20 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 #[ApiResource(
     collectionOperations: [
-        "get",
         "post" => ["security" => "is_granted('IS_AUTHENTICATED_FULLY')"],
     ],
     itemOperations: [
         "get",
         "put" => [
             "security" => "is_granted('IS_AUTHENTICATED_FULLY') and object.getAuthor() == user",
+        ],
+    ],
+    subresourceOperations: [
+        'api_posts_comments_get_subresource' => [
+            'method' => 'GET',
+            'normalization_context' => [
+                'groups' => ['post:comments:subresource'],
+            ],
         ],
     ],
     denormalizationContext: [
@@ -45,25 +52,28 @@ class Comment implements AuthoredEntityInterface, HasDatesInterface
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="comments")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=false)
      */
+    #[Groups(["post:comments:subresource", "posts:show"])]
     private UserInterface $author;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Post", inversedBy="comments")
      * @ORM\JoinColumn(name="post_id", referencedColumnName="id", nullable=false)
      */
+    #[Groups(["comments:fillable", "post:comments:subresource"])]
     private Post $post;
 
     /**
      * @ORM\Column(type="text")
-     * @Groups({"comments:fillable"})
      * @Assert\NotBlank()
      * @Assert\Length(min=5, max=3000)
      */
+    #[Groups(["comments:fillable", "post:comments:subresource", "posts:show"])]
     private string $body;
 
     /**
      * @ORM\Column(type="datetime", name="created_at")
      */
+    #[Groups(["post:comments:subresource"])]
     private DateTimeInterface $createdAt;
 
     public function getId(): int

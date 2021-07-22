@@ -12,5 +12,7 @@ composer-install:
 	docker-compose exec php composer install
 composer-update:
 	docker-compose exec php composer update
+dump-autoload:
+	docker-compose exec php composer dump-autoload -o
 up:
 	docker-compose up -d

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use DateTimeInterface;
 use JetBrains\PhpStorm\Pure;
 use Doctrine\ORM\Mapping as ORM;
@@ -30,7 +31,9 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
         "post" => ["security" => "is_granted('IS_AUTHENTICATED_FULLY')"],
     ],
     itemOperations: [
-        "get",
+        "get" => [
+            "normalization_context" => ["groups" => ["posts:show"]],
+        ],
         "put" => [
             "security" => "is_granted('IS_AUTHENTICATED_FULLY') and object.getAuthor() == user",
         ],
@@ -46,46 +49,51 @@ class Post implements AuthoredEntityInterface, HasDatesInterface
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer", options={"unsigned"=true})
      */
+    #[Groups(["post:comments:subresource", "posts:show"])]
     private int $id;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="posts")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=false)
      */
+    #[Groups(["posts:show"])]
     private UserInterface $author;
 
     /**
      * @ORM\Column(type="string", unique=true, columnDefinition="VARCHAR(255) NOT NULL AFTER `id`")
-     * @Groups({"posts:fillable"})
      * @Assert\NotBlank()
      * @Assert\Length(min=10, max=255)
      */
+    #[Groups(["posts:fillable", "posts:show"])]
     private string $slug;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"posts:fillable"})
      * @Assert\NotBlank()
      * @Assert\Length(min=10, max=255)
      */
+    #[Groups(["posts:fillable", "posts:show"])]
     private string $title;
 
     /**
      * @ORM\Column(type="text")
-     * @Groups({"posts:fillable"})
      * @Assert\NotBlank()
      * @Assert\Length(min=20)
      */
+    #[Groups(["posts:fillable", "posts:show"])]
     private string $content;
 
     /**
      * @ORM\Column(type="datetime", name="created_at")
      */
+    #[Groups(["posts:show"])]
     private DateTimeInterface $createdAt;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Comment", mappedBy="post")
      */
+    #[ApiSubresource()]
+    #[Groups(["posts:show"])]
     private Collection $comments;
 
     #[Pure] public function __construct()
