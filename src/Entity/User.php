@@ -57,7 +57,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
      * @Assert\NotBlank()
      * @Assert\Email()
      */
-    #[Groups(["users:store"])]
+    #[Groups(["users:store", "admin:users:read"])]
     private string $email;
 
     /**
