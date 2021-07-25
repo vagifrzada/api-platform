@@ -29,3 +29,8 @@ services:
         decorates: 'api_platform.serializer.context_builder'
         arguments: ['@.inner']
         autoconfigure: false
+
+    App\Serializer\UserAttributeNormalizer:
+        arguments: [ '@security.token_storage' ]
+        tags:
+            - { name: 'serializer.normalizer', priority: 64 }

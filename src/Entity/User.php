@@ -57,7 +57,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
      * @Assert\NotBlank()
      * @Assert\Email()
      */
-    #[Groups(["users:store", "admin:users:read"])]
+    #[Groups(["users:store", "admin:users:read", "owner:users:read"])]
     private string $email;
 
     /**
@@ -109,6 +109,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
     /**
      * @ORM\Column(type="simple_array", length=200, nullable=true)
      */
+    #[Groups(["admin:users:read", "owner:users:read"])]
     private array $roles;
 
     #[Pure] public function __construct()
