@@ -26,8 +26,8 @@ class UserPasswordHashSubscriber implements EventSubscriberInterface
         $request = $event->getRequest();
 
         if (
-            !$result instanceof User
-            || !in_array($request->getMethod(), [Request::METHOD_POST, Request::METHOD_PUT])
+            !$result instanceof User ||
+            $request->getMethod() !== Request::METHOD_POST
         ) {
             return;
         }

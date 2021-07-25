@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Entity\Traits\CanResetPassword;
 use App\Enum\UserRole;
 use DateTimeInterface;
 use JetBrains\PhpStorm\Pure;
@@ -44,6 +45,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDatesInterface
 {
+    use CanResetPassword;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -80,13 +83,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
      *     message="Password must be confirmed"
      * )
      */
-    #[Groups(["users:store", "users:modify"])]
+    #[Groups(["users:store"])]
     private string $password;
 
     /**
      * @Assert\NotBlank()
      */
-    #[Groups(["users:store", "users:modify"])]
+    #[Groups(["users:store"])]
     private string $passwordConfirmation;
 
     /**
@@ -235,9 +238,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
         return $this->email;
     }
 
-    public function isValidPassword(): bool
+    #[Pure] public function isValidPassword(): bool
     {
-        return $this->password === $this->passwordConfirmation;
+        return $this->getPassword() === $this->getPasswordConfirmation();
     }
 
     #[Pure] public function canWritePost(): bool
