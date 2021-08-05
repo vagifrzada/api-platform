@@ -21,6 +21,10 @@ security:
             pattern: ^/api
             stateless: true
             jwt: ~
+            entry_point: App\Security\Guard\TokenAuthenticator
+            guard:
+                authenticators:
+                    - App\Security\Guard\TokenAuthenticator
 
         #dev:
             #pattern: ^/(_(profiler|wdt)|css|images|js)/

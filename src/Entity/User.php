@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Entity\Traits\CanResetPassword;
 use App\Enum\UserRole;
 use DateTimeInterface;
 use JetBrains\PhpStorm\Pure;
 use Doctrine\ORM\Mapping as ORM;
 use App\Contract\HasDatesInterface;
+use App\Entity\Traits\CanResetPassword;
+use App\Action\User\ResetPasswordAction;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -39,6 +40,13 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
         "put" => [
             "security" => "is_granted('IS_AUTHENTICATED_FULLY') and object == user",
             "denormalization_context" => ["groups" => ["users:modify"]],
+        ],
+        "reset-password" => [
+            "security" => "is_granted('IS_AUTHENTICATED_FULLY') and object == user",
+            "method" => "PUT",
+            "path" => "/users/{id}/reset-password",
+            "controller" => ResetPasswordAction::class,
+            //"denormalization_context" => ["groups" => "users:reset-password"],
         ],
     ],
     normalizationContext: ["groups" => ["users:read"]]
@@ -73,24 +81,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank()
+     * @Assert\NotBlank(groups={"users:store"})
      * @Assert\Regex(
      *     pattern="/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z-_\d]{7,}/",
-     *     message="Password must be minimum seven characters long and contain at least one digit and one uppercase and lowercase letter."
+     *     message="Password must be minimum seven characters long and contain at least one digit and one uppercase and lowercase letter.",
+     *     groups={"users:store"}
      * )
      * @Assert\Expression(
      *     expression="this.isValidPassword()",
-     *     message="Password must be confirmed"
+     *     message="Password must be confirmed",
+     *     groups={"users:store"}
      * )
      */
     #[Groups(["users:store"])]
     private string $password;
 
     /**
-     * @Assert\NotBlank()
+     * @Assert\NotBlank(groups={"users:store"})
      */
     #[Groups(["users:store"])]
     private string $passwordConfirmation;
+
+    /**
+     * @ORM\Column(type="integer", name="password_changed_at", nullable=true)
+     */
+    private ?int $passwordChangedAt = null;
 
     /**
      * @ORM\Column(type="datetime", name="created_at", nullable=false)
@@ -242,6 +257,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
     {
         return $this->getPassword() === $this->getPasswordConfirmation();
     }
+
+    public function getPasswordChangedAt(): ?int
+    {
+        return $this->passwordChangedAt;
+    }
+
+    public function setPasswordChangedAt(?int $time): self
+    {
+        $this->passwordChangedAt = $time;
+
+        return $this;
+    }
+
 
     #[Pure] public function canWritePost(): bool
     {

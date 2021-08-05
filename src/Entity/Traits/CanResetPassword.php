@@ -23,50 +23,50 @@ trait CanResetPassword
      * )
      */
     #[Groups(["users:reset-password"])]
-    private string $newPassword;
+    private ?string $newPassword = null;
 
     /**
      * @Assert\NotBlank()
      */
     #[Groups(["users:reset-password"])]
-    private string $newConfirmationPassword;
+    private ?string $newConfirmationPassword = null;
 
     /**
      * @Assert\NotBlank()
      * @UserPassword()
      */
     #[Groups(["users:reset-password"])]
-    private string $oldPassword;
+    private ?string $oldPassword = null;
 
-    public function getNewPassword(): string
+    public function getNewPassword(): ?string
     {
         return $this->newPassword;
     }
 
-    public function setNewPassword(string $newPassword): self
+    public function setNewPassword(?string $newPassword): self
     {
         $this->newPassword = $newPassword;
         return $this;
     }
 
-    public function getNewConfirmationPassword(): string
+    public function getNewConfirmationPassword(): ?string
     {
         return $this->newConfirmationPassword;
     }
 
-    public function setNewConfirmationPassword(string $newConfirmationPassword): self
+    public function setNewConfirmationPassword(?string $newConfirmationPassword): self
     {
         $this->newConfirmationPassword = $newConfirmationPassword;
 
         return $this;
     }
 
-    public function getOldPassword(): string
+    public function getOldPassword(): ?string
     {
         return $this->oldPassword;
     }
 
-    public function setOldPassword(string $oldPassword): self
+    public function setOldPassword(?string $oldPassword): self
     {
         $this->oldPassword = $oldPassword;
 

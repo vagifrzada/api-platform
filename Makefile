@@ -1,9 +1,11 @@
-init: pull-images build up composer-install generate-key-pairs load-fixtures
+init: pull-images build up composer-install generate-key-pairs migration load-fixtures
 
 pull-images:
 	docker-compose pull
 build:
 	docker-compose build
+migration:
+	docker-compose exec php bin/console doctrine:migrations:migrate
 load-fixtures:
 	docker-compose exec php bin/console doctrine:fixtures:load -q
 generate-key-pairs:

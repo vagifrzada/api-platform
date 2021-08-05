@@ -22,8 +22,7 @@ class UserContextBuilder implements SerializerContextBuilderInterface
         Request $request,
         bool $normalization,
         array $extractedAttributes = null
-    ): array
-    {
+    ): array {
         // Creating original context
         $context = $this->decorated->createFromRequest($request, $normalization, $extractedAttributes);
         $resourceClass = $context['resource_class'] ?? null;
