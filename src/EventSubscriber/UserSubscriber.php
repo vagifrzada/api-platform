@@ -9,11 +9,12 @@ use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
+use App\Security\UserConfirmationTokenGenerator;
 use ApiPlatform\Core\EventListener\EventPriorities;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class UserPasswordHashSubscriber implements EventSubscriberInterface
+class UserSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private UserPasswordHasherInterface $userPasswordHasher,
@@ -22,19 +23,23 @@ class UserPasswordHashSubscriber implements EventSubscriberInterface
 
     public function hashPassword(ViewEvent $event): void
     {
-        $result = $event->getControllerResult();
+        $user = $event->getControllerResult();
         $request = $event->getRequest();
 
         if (
-            !$result instanceof User ||
+            !$user instanceof User ||
             $request->getMethod() !== Request::METHOD_POST
         ) {
             return;
         }
+
+        // Registering/storing user.
         // This is a user instance. So, we need to hash password.
-        $result->setPassword(
-            $this->userPasswordHasher->hashPassword($result, $result->getPassword())
+        $user->setPassword(
+            $this->userPasswordHasher->hashPassword($user, $user->getPassword())
         );
+
+        $user->setConfirmationToken(UserConfirmationTokenGenerator::generate());
     }
 
     #[ArrayShape([KernelEvents::VIEW => "array"])]

@@ -25,6 +25,7 @@ security:
             guard:
                 authenticators:
                     - App\Security\Guard\TokenAuthenticator
+            user_checker: App\Security\UserChecker
 
         #dev:
             #pattern: ^/(_(profiler|wdt)|css|images|js)/

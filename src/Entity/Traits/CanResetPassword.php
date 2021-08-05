@@ -12,28 +12,30 @@ use Symfony\Component\Security\Core\Validator\Constraints\UserPassword;
 trait CanResetPassword
 {
     /**
-     * @Assert\NotBlank()
+     * @Assert\NotBlank(groups={"users:reset-password"})
      * @Assert\Regex(
      *     pattern="/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z-_\d]{7,}/",
-     *     message="Password must be minimum seven characters long and contain at least one digit and one uppercase and lowercase letter."
+     *     message="Password must be minimum seven characters long and contain at least one digit and one uppercase and lowercase letter.",
+     *     groups={"users:reset-password"}
      * )
      * @Assert\Expression(
      *     expression="this.isValidNewPassword()",
-     *     message="Password must be confirmed"
+     *     message="Password must be confirmed",
+     *     groups={"users:reset-password"}
      * )
      */
     #[Groups(["users:reset-password"])]
     private ?string $newPassword = null;
 
     /**
-     * @Assert\NotBlank()
+     * @Assert\NotBlank(groups={"users:reset-password"})
      */
     #[Groups(["users:reset-password"])]
     private ?string $newConfirmationPassword = null;
 
     /**
-     * @Assert\NotBlank()
-     * @UserPassword()
+     * @Assert\NotBlank(groups={"users:reset-password"})
+     * @UserPassword(groups={"users:reset-password"})
      */
     #[Groups(["users:reset-password"])]
     private ?string $oldPassword = null;

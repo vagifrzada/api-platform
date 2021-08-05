@@ -108,6 +108,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
     private ?int $passwordChangedAt = null;
 
     /**
+     * @ORM\Column(type="boolean", options={"default": 0})
+     */
+    private bool $enabled = false;
+
+    /**
+     * @ORM\Column(name="confirmation_token", nullable=true, length=70)
+     */
+    private ?string $confirmationToken = null;
+
+    /**
      * @ORM\Column(type="datetime", name="created_at", nullable=false)
      */
     #[Groups(["users:read", "users:store", "post:comments:subresource", "posts:show"])]
@@ -270,6 +280,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
         return $this;
     }
 
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+    public function setEnabled(bool $enabled): self
+    {
+        $this->enabled = $enabled;
+
+        return $this;
+    }
+
+    public function getConfirmationToken(): ?string
+    {
+        return $this->confirmationToken;
+    }
+
+    public function setConfirmationToken(?string $token): self
+    {
+        $this->confirmationToken = $token;
+
+        return $this;
+    }
 
     #[Pure] public function canWritePost(): bool
     {

@@ -32,7 +32,8 @@
         "symfony/serializer": "5.3.*",
         "symfony/twig-bundle": "5.3.*",
         "symfony/validator": "5.3.*",
-        "symfony/yaml": "5.3.*"
+        "symfony/yaml": "5.3.*",
+        "ext-openssl": "*"
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.4",
