@@ -1,0 +1,9 @@
+{% apply markdown_to_html %}
+    Welcome, {{ user.getName() }}!
+    ===========================
+
+    You signed up to our site using the following email:
+    `{{ user.getEmail() }}`
+
+    [Click here to activate your account]({{ url("users.confirm", {"token": user.getConfirmationToken()}) }})
+{% endapply %}

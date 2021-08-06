@@ -16,7 +16,7 @@ services:
       - .:/app
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     ports:
-      - 8080:80
+      - "8080:80"
     depends_on:
       - php
     networks:
@@ -38,7 +38,7 @@ services:
     restart: unless-stopped
     tty: true
     ports:
-      - 3308:3306
+      - "3308:3306"
     volumes:
       - db_data:/var/lib/mysql
     environment:
@@ -49,5 +49,14 @@ services:
       SERVICE_NAME: mysql
       TZ: Asia/Baku
     command: --sql_mode=""
+    networks:
+      - api-platform
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
     networks:
       - api-platform

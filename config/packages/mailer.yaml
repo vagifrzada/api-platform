@@ -1,0 +1,8 @@
+framework:
+    mailer:
+        dsn: '%env(MAILER_DSN)%'
+#         envelope:
+#             sender: 'vagif@rufullazada.me'
+#         headers:
+#             from: 'Vagif Rufullazada <vagif@rufullazada.me>'
+            #X-Custom-Header: 'foobar'

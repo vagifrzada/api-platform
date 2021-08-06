@@ -46,7 +46,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
             "method" => "PUT",
             "path" => "/users/{id}/reset-password",
             "controller" => ResetPasswordAction::class,
-            //"denormalization_context" => ["groups" => "users:reset-password"],
+            "denormalization_context" => ["groups" => "users:reset-password"],
         ],
     ],
     normalizationContext: ["groups" => ["users:read"]]
