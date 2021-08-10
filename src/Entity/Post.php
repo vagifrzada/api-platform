@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiSubresource;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use DateTimeInterface;
 use JetBrains\PhpStorm\Pure;
 use Doctrine\ORM\Mapping as ORM;
@@ -40,10 +43,20 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
             "security" => "is_granted('ROLE_EDITOR') or (is_granted('ROLE_WRITER') and object.getAuthor() == user)",
         ],
     ],
+    attributes: [
+        "order" => ["createdAt" => "DESC"],
+    ],
     denormalizationContext: [
         "groups" => ["posts:fillable"]
-    ],
+    ]
 )]
+#[ApiFilter(SearchFilter::class, properties: [
+    'id'      => 'exact',
+    'title'   => 'partial',
+    'content' => 'partial',
+    'author'  => 'exact',
+])]
+#[ApiFilter(DateFilter::class, properties: ['createdAt'])]
 class Post implements AuthoredEntityInterface, HasDatesInterface
 {
     /**
@@ -98,9 +111,18 @@ class Post implements AuthoredEntityInterface, HasDatesInterface
     #[Groups(["posts:show"])]
     private Collection $comments;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Image")
+     * @ORM\JoinTable(name="posts_images")
+     */
+    #[ApiSubresource()]
+    #[Groups(["posts:fillable", "posts:show"])]
+    private Collection $images;
+
     #[Pure] public function __construct()
     {
         $this->comments = new ArrayCollection();
+        $this->images = new ArrayCollection();
     }
 
     public function getId(): int
@@ -178,5 +200,24 @@ class Post implements AuthoredEntityInterface, HasDatesInterface
         }
 
         return $this;
+    }
+
+    public function getImages(): Collection
+    {
+        return $this->images;
+    }
+
+    public function addImage(Image $image): void
+    {
+        if (!$this->images->contains($image)) {
+            $this->images->add($image);
+        }
+    }
+
+    public function removeImage(Image $image): void
+    {
+        if ($this->images->contains($image)) {
+            $this->images->removeElement($image);
+        }
     }
 }

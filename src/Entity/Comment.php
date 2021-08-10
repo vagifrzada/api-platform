@@ -35,6 +35,9 @@ use Symfony\Component\Validator\Constraints as Assert;
             ],
         ],
     ],
+    attributes: [
+        "order" => ["createdAt" => "DESC"],
+    ],
     denormalizationContext: [
         "groups" => ["comments:fillable"],
     ],
@@ -73,7 +76,7 @@ class Comment implements AuthoredEntityInterface, HasDatesInterface
     /**
      * @ORM\Column(type="datetime", name="created_at")
      */
-    #[Groups(["post:comments:subresource"])]
+    #[Groups(["post:comments:subresource", "posts:show"])]
     private DateTimeInterface $createdAt;
 
     public function getId(): int
