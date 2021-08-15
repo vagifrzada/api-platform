@@ -3,5 +3,15 @@ api_platform:
         paths: ['%kernel.project_dir%/src/Entity']
     patch_formats:
         json: ['application/merge-patch+json']
+    eager_loading:
+        enabled: true
+    collection:
+        pagination:
+            page_parameter_name: page
+    defaults:
+        pagination_enabled: true
+        pagination_client_enabled: false
+        pagination_partial: true
+        pagination_items_per_page: 10
     swagger:
         versions: [3]

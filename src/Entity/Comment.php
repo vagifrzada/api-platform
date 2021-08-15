@@ -37,6 +37,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     ],
     attributes: [
         "order" => ["createdAt" => "DESC"],
+        "pagination_enabled" => false,
     ],
     denormalizationContext: [
         "groups" => ["comments:fillable"],

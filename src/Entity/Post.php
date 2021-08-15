@@ -4,22 +4,26 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiFilter;
-use ApiPlatform\Core\Annotation\ApiSubresource;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+
 use DateTimeInterface;
 use JetBrains\PhpStorm\Pure;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\PostRepository;
 use App\Contract\HasDatesInterface;
 use App\Contract\AuthoredEntityInterface;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Security\Core\User\UserInterface;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use Symfony\Component\Security\Core\User\UserInterface;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\RangeFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
@@ -45,6 +49,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
     ],
     attributes: [
         "order" => ["createdAt" => "DESC"],
+        //"pagination_items_per_page" => 100,
     ],
     denormalizationContext: [
         "groups" => ["posts:fillable"]
@@ -55,8 +60,16 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
     'title'   => 'partial',
     'content' => 'partial',
     'author'  => 'exact',
+    'author.name' => 'partial',
 ])]
 #[ApiFilter(DateFilter::class, properties: ['createdAt'])]
+#[ApiFilter(RangeFilter::class, properties: ['id'])]
+#[ApiFilter(OrderFilter::class, properties: ['id', 'title', 'createdAt'], arguments: ['orderParameterName' => 'order'])]
+#[ApiFilter(PropertyFilter::class, arguments: [
+    'parameterName' => 'properties',
+    'overrideDefaultProperties' => false,
+    'whitelist' => ['id', 'title', 'slug', 'content', 'author' => ['id', 'name'],],
+])]
 class Post implements AuthoredEntityInterface, HasDatesInterface
 {
     /**
