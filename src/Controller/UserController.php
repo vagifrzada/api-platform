@@ -7,9 +7,9 @@ namespace App\Controller;
 use App\Service\UserService;
 use Doctrine\ORM\EntityNotFoundException;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Exception\InvalidConfirmationTokenException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 #[Route("/users", name: "users.")]
 class UserController extends AbstractController
@@ -19,6 +19,9 @@ class UserController extends AbstractController
     ) {
     }
 
+    /**
+     * @throws InvalidConfirmationTokenException
+     */
     #[Route("/confirm/{token}", name: "confirm", methods: ["GET"])]
     public function confirm(string $token): RedirectResponse
     {
@@ -26,7 +29,7 @@ class UserController extends AbstractController
             $this->userService->enable($token);
             return $this->redirectToRoute("home");
         } catch (EntityNotFoundException) {
-            throw new NotFoundHttpException("Couldn't enable user.");
+            throw InvalidConfirmationTokenException::fromMessage("Invalid confirmation token !");
         }
     }    
 }

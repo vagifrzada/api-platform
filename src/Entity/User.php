@@ -24,8 +24,6 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
  * @ORM\Table("users")
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @UniqueEntity("email")
- *
- * @method string getUserIdentifier()
  */
 #[ApiResource(
     collectionOperations: [
@@ -256,6 +254,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDate
 
     public function eraseCredentials(): void
     {
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
     }
 
     public function getUsername(): string

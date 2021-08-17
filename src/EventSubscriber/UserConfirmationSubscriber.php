@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\EventSubscriber;
 
 use App\Entity\UserConfirmation;
+use App\Exception\InvalidConfirmationTokenException;
 use App\Service\UserService;
 use JetBrains\PhpStorm\ArrayShape;
 use Doctrine\ORM\EntityNotFoundException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -21,10 +23,14 @@ class UserConfirmationSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private UserService $userService,
+        private LoggerInterface $logger,
     ) {
     }
 
-    public function confirm(ViewEvent $event)
+    /**
+     * @throws InvalidConfirmationTokenException
+     */
+    public function confirm(ViewEvent $event): void
     {
         $request = $event->getRequest();
 
@@ -32,13 +38,17 @@ class UserConfirmationSubscriber implements EventSubscriberInterface
             return;
         }
 
+        $this->logger->info("Trying to confirm user...");
+
         /** @var UserConfirmation $userConfirmation */
         $userConfirmation = $event->getControllerResult();
 
         try {
             $this->userService->enable($userConfirmation->getToken());
+            $this->logger->info("User enabled successfully !");
         } catch (EntityNotFoundException) {
-            throw new NotFoundHttpException("Entity not found !");
+            $this->logger->error("Confirmation token not found !");
+            throw InvalidConfirmationTokenException::fromMessage("Invalid confirmation token !");
         }
 
         $event->setResponse(new JsonResponse(null, Response::HTTP_OK));

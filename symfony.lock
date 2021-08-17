@@ -159,6 +159,9 @@
             "config/packages/lexik_jwt_authentication.yaml"
         ]
     },
+    "monolog/monolog": {
+        "version": "2.3.2"
+    },
     "myclabs/php-enum": {
         "version": "1.8.3"
     },
@@ -348,6 +351,24 @@
     },
     "symfony/mime": {
         "version": "v5.3.4"
+    },
+    "symfony/monolog-bridge": {
+        "version": "v5.3.4"
+    },
+    "symfony/monolog-bundle": {
+        "version": "3.7",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "3.7",
+            "ref": "a7bace7dbc5a7ed5608dbe2165e0774c87175fe6"
+        },
+        "files": [
+            "config/packages/dev/monolog.yaml",
+            "config/packages/prod/deprecations.yaml",
+            "config/packages/prod/monolog.yaml",
+            "config/packages/test/monolog.yaml"
+        ]
     },
     "symfony/orm-pack": {
         "version": "v2.1.0"
