@@ -44,7 +44,8 @@
         "doctrine/doctrine-fixtures-bundle": "^3.4",
         "fakerphp/faker": "^1.14",
         "squizlabs/php_codesniffer": "3.*",
-        "symfony/maker-bundle": "^1.32"
+        "symfony/maker-bundle": "^1.32",
+        "symfony/phpunit-bridge": "^5.3"
     },
     "config": {
         "optimize-autoloader": true,

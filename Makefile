@@ -18,3 +18,5 @@ dump-autoload:
 	docker-compose exec php composer dump-autoload -o
 up:
 	docker-compose up -d
+tester:
+	docker-compose exec php bin/phpunit
