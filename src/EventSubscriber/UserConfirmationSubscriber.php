@@ -23,7 +23,7 @@ class UserConfirmationSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private UserService $userService,
-        private LoggerInterface $logger,
+        private LoggerInterface $userConfirmationLogger,
     ) {
     }
 
@@ -38,16 +38,16 @@ class UserConfirmationSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $this->logger->info("Trying to confirm user...");
+        $this->userConfirmationLogger->info("Trying to confirm user...");
 
         /** @var UserConfirmation $userConfirmation */
         $userConfirmation = $event->getControllerResult();
 
         try {
             $this->userService->enable($userConfirmation->getToken());
-            $this->logger->info("User enabled successfully !");
+            $this->userConfirmationLogger->info("User enabled successfully !");
         } catch (EntityNotFoundException) {
-            $this->logger->error("Confirmation token not found !");
+            $this->userConfirmationLogger->error("Confirmation token not found !");
             throw InvalidConfirmationTokenException::fromMessage("Invalid confirmation token !");
         }
 
