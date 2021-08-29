@@ -25,14 +25,15 @@ class EntityPropertySubscriber implements EventSubscriberInterface
     public function applyPropertyValue(ViewEvent $event): void
     {
         $entity = $event->getControllerResult();
-        $request = $event->getRequest();
 
-        if (!$this->isCreating($request)) {
+        if (!$this->isCreating($event->getRequest())) {
             return;
         }
 
         if ($entity instanceof AuthoredEntityInterface) {
-            $entity->setAuthor($this->tokenStorage->getToken()->getUser());
+            if (!is_null($token = $this->tokenStorage->getToken())) {
+                $entity->setAuthor($token->getUser());
+            }
         }
 
         if ($entity instanceof HasDatesInterface) {
